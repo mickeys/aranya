@@ -9,9 +9,17 @@
 # ===============================================================================
 require 'json'							# JSON (JavaScript Object Notation)
 require './spider.rb'					# the JSON-crawling spider
+require 'pp'
 
 RESPONSE = './json/cars.json'.freeze	#
+#RESPONSE = './json/introspection.json'.freeze	#
 
-r = JSON.parse(File.read(RESPONSE))
+begin
+	r = JSON.parse(File.read(RESPONSE))
+
+	rescue JSON::ParserError => e
+		STDERR.puts "error: #{e.class.name} error in '#{RESPONSE}'; quitting."
+		exit
+end
 
 spider(r)
