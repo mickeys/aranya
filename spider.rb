@@ -43,27 +43,25 @@ class Validate
 end
 
 # -------------------------------------------------------------------------------
-def spider(a, depth=0)
-	typename = a['__typename']
+def spider( response, sdl, depth=0 )
 	v = Validate.instance				# we'd like a dispatcher, please
-#	begin
-		unless typename.nil?			# if no '_typename' at this level
-			if v.respond_to?(typename) # && %w[foo bar].include?(method_name)
-				v.send(typename)
-			else
-				STDERR.puts "error: unknown __typename '#{typename}'; skipping."
-			end
+
+	typename = response['__typename']
+#	typename = response['name']
+
+	unless typename.nil?				# if there's a '_typename' at this level
+		if v.respond_to?(typename)		# and validate knows about it
+			v.send(typename)			# then give it a go
+		else
+			STDERR.puts "error: unknown __typename '#{typename}'; skipping."
 		end
+	end
 
-#	rescue NoMethodError #=> e
-#		STDERR.puts "error: unknown __typename '#{typename}'; skipping."
-#	end
-
-	a.each do |pair|
+	response.each do |pair|
 		# printf( "%s (%s)\n", ' '*(depth*2), pair) # pretty-print the object
 
 		if pair[1].is_a?(Hash)			# any children an object by themselves?
-			spider(pair[1], depth+1 )	# give them a chance in the spotlight!
+			spider(pair[1], sdl, depth+1 )	# recurse on that child
 		end
 	end
 end
